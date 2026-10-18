@@ -1,0 +1,387 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Galeri Kenangan Kita</title>
+
+<style>
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background: #100d1c;
+  color: white;
+}
+
+header {
+  text-align: center;
+  padding: 35px 15px;
+  background: linear-gradient(135deg, #541a86, #17112c);
+}
+
+header h1 {
+  font-size: 30px;
+  margin-bottom: 10px;
+}
+
+header p {
+  color: #ded1ff;
+  line-height: 1.6;
+}
+
+.container {
+  width: 92%;
+  max-width: 1050px;
+  margin: 25px auto;
+}
+
+h2 {
+  margin: 25px 0 15px;
+  color: #d9b5ff;
+}
+
+.members {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.member {
+  background: #211a35;
+  border: 1px solid #49336a;
+  padding: 18px 8px;
+  text-align: center;
+  border-radius: 12px;
+}
+
+.avatar {
+  width: 55px;
+  height: 55px;
+  border-radius: 50%;
+  margin: 0 auto 10px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, #a855f7, #6334a1);
+  font-size: 23px;
+}
+
+.member p {
+  color: #d7c9ed;
+  font-size: 13px;
+  margin-top: 5px;
+}
+
+.upload-box {
+  background: #211a35;
+  border: 1px solid #49336a;
+  padding: 20px;
+  border-radius: 14px;
+  margin-bottom: 20px;
+}
+
+input, textarea {
+  width: 100%;
+  padding: 12px;
+  margin: 8px 0;
+  border-radius: 8px;
+  border: 1px solid #594277;
+  background: #151024;
+  color: white;
+}
+
+button {
+  background: #9333ea;
+  border: none;
+  color: white;
+  padding: 11px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+button:hover {
+  background: #a855f7;
+}
+
+.photos {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+
+.photo-card {
+  background: #211a35;
+  padding: 10px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.photo-card img {
+  display: block;
+  width: 100%;
+  height: 190px;
+  object-fit: cover;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.photo-card p {
+  margin: 10px 0;
+  overflow-wrap: anywhere;
+}
+
+.delete {
+  background: #b42338;
+  padding: 8px 12px;
+}
+
+.empty {
+  color: #b7a9ca;
+  padding: 20px 0;
+}
+
+footer {
+  text-align: center;
+  padding: 25px 12px;
+  color: #b7a9ca;
+  margin-top: 30px;
+}
+
+#viewer {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: #000e;
+  z-index: 10;
+  justify-content: center;
+  align-items: center;
+  padding: 15px;
+}
+
+#viewer img {
+  max-width: 100%;
+  max-height: 85vh;
+  object-fit: contain;
+}
+
+@media (min-width: 700px) {
+  .photos {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 380px) {
+  .members {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>💜 Galeri Kenangan Kita</h1>
+  <p>Sembilan teman, sejuta cerita, kenangan selamanya.</p>
+</header>
+
+<main class="container">
+
+  <h2>👥 Anggota Kita</h2>
+  <section class="members" id="members"></section>
+
+  <h2>📸 Tambahkan Kenangan</h2>
+
+  <section class="upload-box">
+    <form id="photoForm">
+      <label for="photo">Pilih foto (maksimal 2 MB)</label>
+      <input id="photo" type="file" accept="image/*" required>
+
+      <label for="caption">Cerita atau keterangan foto</label>
+      <textarea id="caption" placeholder="Ceritakan kenangan ini..." rows="3"></textarea>
+
+      <button type="submit">＋ Simpan Foto</button>
+    </form>
+    <p id="message" style="margin-top:12px;color:#d9b5ff"></p>
+  </section>
+
+  <h2>🖼️ Kenangan Bersama</h2>
+  <section class="photos" id="photos"></section>
+  <p class="empty" id="empty">Belum ada foto. Yuk, tambahkan kenangan pertama!</p>
+
+</main>
+
+<footer>
+  Dibuat dengan 💜 untuk persahabatan kita.<br>
+  <small>Kenangan hari ini, cerita untuk selamanya.</small>
+</footer>
+
+<div id="viewer" onclick="this.style.display='none'">
+  <img id="largeImage" alt="Foto kenangan">
+</div>
+
+<script>
+const anggota = [
+  "Anggota 1", "Anggota 2", "Anggota 3",
+  "Anggota 4", "Anggota 5", "Anggota 6",
+  "Anggota 7", "Anggota 8", "Anggota 9"
+];
+
+const memberArea = document.getElementById("members");
+
+anggota.forEach((nama, index) => {
+  const card = document.createElement("div");
+  card.className = "member";
+
+  const avatar = document.createElement("div");
+  avatar.className = "avatar";
+  avatar.textContent = "💜";
+
+  const title = document.createElement("h3");
+  title.textContent = nama;
+
+  const desc = document.createElement("p");
+  desc.textContent = "Bagian dari cerita kita";
+
+  card.append(avatar, title, desc);
+  memberArea.appendChild(card);
+});
+
+const STORAGE_KEY = "galeriKenanganV1";
+const photoArea = document.getElementById("photos");
+const emptyText = document.getElementById("empty");
+const message = document.getElementById("message");
+
+let photos = [];
+
+try {
+  photos = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+  if (!Array.isArray(photos)) photos = [];
+} catch {
+  photos = [];
+}
+
+function savePhotos() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(photos));
+    return true;
+  } catch (error) {
+    message.textContent =
+      "Penyimpanan browser penuh. Hapus beberapa foto lalu coba lagi.";
+    return false;
+  }
+}
+
+function renderPhotos() {
+  photoArea.replaceChildren();
+  emptyText.style.display = photos.length ? "none" : "block";
+
+  photos.forEach((photo) => {
+    const card = document.createElement("article");
+    card.className = "photo-card";
+
+    const img = document.createElement("img");
+    img.src = photo.image;
+    img.alt = photo.caption || "Foto kenangan";
+    img.addEventListener("click", () => {
+      document.getElementById("largeImage").src = photo.image;
+      document.getElementById("viewer").style.display = "flex";
+    });
+
+    const caption = document.createElement("p");
+    caption.textContent = photo.caption || "Kenangan bersama 💜";
+
+    const date = document.createElement("small");
+    date.textContent = photo.date;
+
+    const del = document.createElement("button");
+    del.className = "delete";
+    del.textContent = "Hapus foto";
+    del.style.marginTop = "10px";
+
+    del.addEventListener("click", () => {
+      if (!confirm("Yakin ingin menghapus foto ini?")) return;
+
+      const previous = photos;
+      photos = photos.filter(item => item.id !== photo.id);
+
+      if (!savePhotos()) {
+        photos = previous;
+        return;
+      }
+
+      message.textContent = "Foto berhasil dihapus dari browser ini.";
+      renderPhotos();
+    });
+
+    card.append(img, caption, date, document.createElement("br"), del);
+    photoArea.appendChild(card);
+  });
+}
+
+document.getElementById("photoForm").addEventListener("submit", (event) => {
+  event.preventDefault();
+
+  const file = document.getElementById("photo").files[0];
+  const caption = document.getElementById("caption").value.trim();
+
+  if (!file) {
+    message.textContent = "Pilih foto terlebih dahulu.";
+    return;
+  }
+
+  if (!file.type.startsWith("image/")) {
+    message.textContent = "File harus berupa gambar.";
+    return;
+  }
+
+  if (file.size > 2 * 1024 * 1024) {
+    message.textContent = "Ukuran foto maksimal 2 MB.";
+    return;
+  }
+
+  if (photos.length >= 30) {
+    message.textContent = "Maksimal 30 foto. Hapus foto lama terlebih dahulu.";
+    return;
+  }
+
+  const reader = new FileReader();
+
+  reader.onload = () => {
+    const previous = photos;
+
+    photos = [{
+      id: Date.now() + "-" + Math.random().toString(36).slice(2),
+      image: reader.result,
+      caption,
+      date: new Date().toLocaleDateString("id-ID")
+    }, ...photos];
+
+    if (!savePhotos()) {
+      photos = previous;
+      return;
+    }
+
+    renderPhotos();
+    event.target.reset();
+    message.textContent = "Kenangan berhasil disimpan! 💜";
+  };
+
+  reader.onerror = () => {
+    message.textContent = "Foto gagal dibaca. Coba pilih foto lain.";
+  };
+
+  reader.readAsDataURL(file);
+});
+
+renderPhotos();
+</script>
+
+</body>
+</html>
